@@ -72,8 +72,46 @@ SoundBridge es un proyecto desarrollado para ayudar a una chica sorda a recibir 
 5. **Instalar dependencias**:
     ```bash
     sudo apt-get update & upgrade
-    sudo apt-get install -y pulseaudio
+    sudo apt-get install -y pulseaudio pulseaudio-module-bluetooth bluez pavucontrol
+    sudo systemctl --user enable bluetooth
+    sudo systemctl start bluetooth
+    sudo systemctl --user enable pulseaudio
+    sudo systemctl start pulseaudio
+    pactl load-module module-bluetooth-discover
     ```
+6. **Emparejar cascos bluetooth**:
+
+   ```bash
+   bluetoothctl
+   scan on
+   pair <MAC>
+   connect <MAC>
+   ```
+7. **Conectar en pulseaudio**:
+   ```bash
+   pactl list sinks
+   pactl list sources
+   pactl load-module module-loopback source=MICROFONO sink=AURICULARES latency_msec=50
+   ```
+
+8. **Ajustes finales**:
+   ```bash
+   pavucontrol #Gestionar el sonido
+   ```
+   Si quieres que se ejecute al iniciar la raspberry siempre:
+   ```
+    ~/.config/pulse/default.pa
+   ```
+   y añade:
+   ```
+   pactl load-module module-loopback source=MICROFONO sink=AURICULARES latency_msec=50
+   ```
+
+   Final:
+   ```
+   pulseaudio -k
+   pulseaudio --start
+   ``
 
 ## 🚀 Uso
 
