@@ -8,7 +8,7 @@
 
 ## 📜 Descripción
 
-SoundBridge es un proyecto desarrollado para ayudar a una chica sorda a recibir sonidos directamente en su cerebro. Utiliza una Raspberry Pi para captar los sonidos a través de un micrófono y luego los transmite a los audífonos de conducción ósea conectados por Bluetooth a un dispositivo que envía estas señales al cerebro.
+SoundBridge es un proyecto desarrollado para ayudar a una chica con sordera a recibir sonidos directamente en su cerebro. Utiliza una Raspberry Pi para captar los sonidos a través de un micrófono y luego los transmite a los audífonos de conducción ósea conectados por Bluetooth a un dispositivo que envía estas señales al cerebro.
 
 ## 🛠️ Componentes
 
