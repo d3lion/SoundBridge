@@ -112,6 +112,107 @@ SoundBridge es un proyecto desarrollado para ayudar a una chica con sordera a re
    pulseaudio -k
    pulseaudio --start
    ``
+# **Mejoras del audio**
+## 🎯 **Objetivos:**  
+✅ **Subir el volumen del loopback** al máximo posible sin distorsionar.  
+✅ **Evitar saturación** para que el sonido sea claro.  
+✅ **Optimizar la latencia** para que el sonido sea lo más instantáneo posible.  
+
+## 🛠 **Pasos a seguir:**
+
+### 🔹 1. **Cargar el módulo Loopback si no está activo**
+Si aún no lo has hecho, activa el loopback para capturar y reenviar el sonido:  
+```bash
+pactl load-module module-loopback latency_msec=1
+```
+💡 **Reducimos la latencia a 1ms** para evitar retrasos.
+
+---
+
+### 🔹 2. **Subir el volumen al máximo sin distorsión**  
+
+#### 📌 **Aumentar el volumen del Loopback**
+Primero, encuentra el **ID del loopback**:  
+```bash
+pactl list sink-inputs | grep -E 'Sink Input|Volume'
+```
+Verás algo como:  
+```
+Sink Input #42
+    Volume: front-left: 65536 / 100% / 0 dB, front-right: 65536 / 100% / 0 dB
+```
+Aquí, el **ID es 42**. Ahora súbelo más del 100% (con cuidado de la distorsión):  
+```bash
+pactl set-sink-input-volume 42 150%
+```
+Si se sigue escuchando bajo, prueba **200%**:
+```bash
+pactl set-sink-input-volume 42 200%
+```
+
+---
+
+#### 📌 **Aumentar el volumen de los auriculares Bluetooth**  
+Encuentra el ID de los auriculares:  
+```bash
+pactl list sinks | grep -E 'Sink #|Name|Volume'
+```
+Si el ID es **1**, sube su volumen:  
+```bash
+pactl set-sink-volume 1 150%
+```
+
+---
+
+### 🔹 3. **Reducir la saturación con un compresor de audio**  
+Si el sonido empieza a distorsionar al aumentar el volumen, podemos aplicar un **compresor** con **`ladspa`**, que ajustará el volumen automáticamente.  
+
+Primero, instala el paquete necesario:  
+```bash
+sudo apt install swh-plugins
+```
+Luego, carga el módulo con el **compresor**:  
+```bash
+pactl load-module module-ladspa-sink sink_name=compresor plugin=sc4_1882 label=sc4 control=5,1,200,-20,10,5,12
+```
+📌 **Explicación de los parámetros**:  
+- `5` → Tiempo de ataque rápido (reacciona rápido a cambios de volumen).  
+- `1` → Tiempo de liberación corto.  
+- `200` → Ratio del compresor (reduce picos de volumen).  
+- `-20` → Umbral de compresión (suaviza los sonidos fuertes).  
+- `10` → Ganancia de compensación (recupera el volumen).  
+- `5` → Evita distorsión.  
+- `12` → Máximo nivel de salida.  
+
+Ahora, redirige el audio del **Loopback** al nuevo **"compresor"**:  
+```bash
+pactl move-sink-input 42 compresor
+```
+
+---
+
+### 🔹 4. **Hacer que los cambios sean permanentes**  
+Si todo funciona bien, haz que los cambios se carguen al iniciar **PulseAudio**.  
+
+Edita el archivo de configuración:  
+```bash
+nano ~/.config/pulse/default.pa
+```
+Añade al final:  
+```
+load-module module-loopback latency_msec=1
+load-module module-ladspa-sink sink_name=compresor plugin=sc4_1882 label=sc4 control=5,1,200,-20,10,5,12
+```
+Guarda con `CTRL + X`, `Y`, y `ENTER`.
+
+---
+
+## 🎧 **Resumen Final**
+1️⃣ **Activa el Loopback** → Captura y reenvía el sonido.  
+2️⃣ **Sube el volumen del loopback** → `pactl set-sink-input-volume <ID> 200%`  
+3️⃣ **Sube el volumen del Bluetooth** → `pactl set-sink-volume <ID> 150%`  
+4️⃣ **Añade un compresor de audio** → Evita la saturación.  
+5️⃣ **Haz los cambios permanentes** → Para que se carguen siempre.  
 
 ## 🚀 Uso
 
